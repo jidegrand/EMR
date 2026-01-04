@@ -8,7 +8,7 @@ import { TopHeader, SecondaryToolbar, LeftPanel, RightPanel } from './components
 
 // Screens
 import { 
-  LoginScreen, DashboardContent, RecordViewer, SettingsPage, 
+  LoginScreen, TwoFactorScreen, DashboardContent, RecordViewer, SettingsPage, 
   AppointmentScheduler, MessageCenter, PrescriptionHistory, 
   LabOrdersHistory, ReferralsTracking, PatientLookup 
 } from './screens';
@@ -50,6 +50,8 @@ const ThemedApp = ({ children }) => {
 export default function ExtendiLiteEMR() {
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null);
   const [user, setUser] = useState(null);
   
   // Navigation State
@@ -76,7 +78,30 @@ export default function ExtendiLiteEMR() {
   // Handlers
   const handleLogin = (userData) => { 
     setUser(userData); 
-    setIsAuthenticated(true); 
+    setIsAuthenticated(true);
+    setRequires2FA(false);
+    setPendingUser(null);
+  };
+  
+  const handleRequire2FA = (userData) => {
+    setPendingUser(userData);
+    setRequires2FA(true);
+  };
+  
+  const handle2FAVerify = ({ rememberDevice }) => {
+    setUser(pendingUser);
+    setIsAuthenticated(true);
+    setRequires2FA(false);
+    setPendingUser(null);
+    // In production, store device token if rememberDevice is true
+    if (rememberDevice) {
+      console.log('Device will be remembered for 30 days');
+    }
+  };
+  
+  const handle2FACancel = () => {
+    setRequires2FA(false);
+    setPendingUser(null);
   };
   
   const handleLogoutClick = () => {
@@ -86,6 +111,8 @@ export default function ExtendiLiteEMR() {
   const handleLogoutConfirm = () => { 
     setIsAuthenticated(false); 
     setUser(null);
+    setRequires2FA(false);
+    setPendingUser(null);
     setShowLogoutModal(false);
     setActiveSection('dashboard');
   };
@@ -93,6 +120,8 @@ export default function ExtendiLiteEMR() {
   const handleSessionTimeout = () => {
     setIsAuthenticated(false);
     setUser(null);
+    setRequires2FA(false);
+    setPendingUser(null);
     setActiveSection('dashboard');
   };
   
@@ -114,11 +143,27 @@ export default function ExtendiLiteEMR() {
   };
 
   // Render Login if not authenticated
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !requires2FA) {
     return (
       <ThemeProvider>
         <ToastProvider>
-          <LoginScreen onLogin={handleLogin} />
+          <LoginScreen onLogin={handleLogin} onRequire2FA={handleRequire2FA} />
+        </ToastProvider>
+      </ThemeProvider>
+    );
+  }
+  
+  // Render 2FA screen if required
+  if (requires2FA && pendingUser) {
+    return (
+      <ThemeProvider>
+        <ToastProvider>
+          <TwoFactorScreen 
+            user={pendingUser}
+            onVerify={handle2FAVerify}
+            onCancel={handle2FACancel}
+            onResend={() => console.log('Resend 2FA code')}
+          />
         </ToastProvider>
       </ThemeProvider>
     );

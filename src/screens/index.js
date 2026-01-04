@@ -1,4 +1,5 @@
 export { default as LoginScreen } from './LoginScreen';
+export { default as TwoFactorScreen } from './TwoFactorScreen';
 export { default as DashboardContent } from './DashboardContent';
 export { default as RecordViewer } from './RecordViewer';
 export { default as SettingsPage } from './SettingsPage';

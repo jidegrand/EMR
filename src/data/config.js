@@ -5,14 +5,31 @@
 // Application Information
 export const APP_INFO = {
   name: 'ExtendiLite',
-  version: '1.0.0.1',
+  version: '1.0.0.2', // Updated for 2FA feature
   environment: 'TST', // DEV, TST, UAT, PRD
-  buildDate: '2026-01-02',
+  buildDate: '2026-01-03',
 };
+
+// Two-Factor Authentication Settings
+export const TWO_FACTOR_CONFIG = {
+  enabled: true,                    // Toggle 2FA globally
+  codeLength: 6,                    // Length of TOTP code
+  codeExpirySeconds: 30,            // Code validity period
+  maxAttempts: 3,                   // Max failed attempts before lockout
+  lockoutMinutes: 15,               // Lockout duration after max attempts
+  rememberDeviceDays: 30,           // "Remember this device" duration
+  methods: ['totp', 'sms', 'email'], // Supported 2FA methods
+  defaultMethod: 'totp',            // Default method for new users
+};
+
+// Demo 2FA Code (for testing purposes - in production this would be generated)
+export const DEMO_2FA_CODE = '123456';
 
 export const DEMO_CREDENTIALS = { 
   email: 'jide.grand@extendilite.com', 
-  password: 'SecurePass123!' 
+  password: 'SecurePass123!',
+  twoFactorEnabled: true,
+  twoFactorMethod: 'totp', // totp, sms, or email
 };
 
 export const MOCK_USER = {
@@ -25,6 +42,8 @@ export const MOCK_USER = {
   avatar: 'JG',
   department: 'SHB NUC MED',
   workstationId: 'WS-NUC-001', // Workstation/Device ID
+  twoFactorEnabled: true,
+  twoFactorMethod: 'totp',
 };
 
 export const ID_TYPES = [

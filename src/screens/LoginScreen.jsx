@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Stethoscope, Mail, Lock, Eye, EyeOff, RefreshCw, LogIn, AlertCircle, Info, ShieldCheck } from 'lucide-react';
+import { Stethoscope, Mail, Lock, Eye, EyeOff, RefreshCw, LogIn, AlertCircle, Info, ShieldCheck, Smartphone } from 'lucide-react';
 import { Button, Input } from '../components/ui';
-import { DEMO_CREDENTIALS, MOCK_USER } from '../data';
+import { DEMO_CREDENTIALS, MOCK_USER, TWO_FACTOR_CONFIG } from '../data';
 import { useToast } from '../contexts';
 
-const LoginScreen = ({ onLogin }) => {
+const LoginScreen = ({ onLogin, onRequire2FA }) => {
   const toast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,9 +17,16 @@ const LoginScreen = ({ onLogin }) => {
     setError('');
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 800));
+    
     if (email.toLowerCase() === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.password) {
-      toast.success(`Welcome back, ${MOCK_USER.name}!`);
-      onLogin(MOCK_USER);
+      // Check if 2FA is enabled for this user
+      if (TWO_FACTOR_CONFIG.enabled && DEMO_CREDENTIALS.twoFactorEnabled) {
+        toast.info('Please complete two-factor authentication');
+        onRequire2FA(MOCK_USER);
+      } else {
+        toast.success(`Welcome back, ${MOCK_USER.name}!`);
+        onLogin(MOCK_USER);
+      }
     } else {
       toast.error('Invalid credentials');
       setError('Invalid email or password. Please use the demo credentials below.');
@@ -34,7 +41,7 @@ const LoginScreen = ({ onLogin }) => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-2xl shadow-lg shadow-teal-500/30 mb-4">
             <Stethoscope className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">ExtendiLite eMR</h1>
+          <h1 className="text-2xl font-bold text-white mb-1">ExtendiLite EMR</h1>
           <p className="text-slate-400">Provider Portal - Secure Login</p>
         </div>
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
@@ -83,6 +90,15 @@ const LoginScreen = ({ onLogin }) => {
               {isLoading ? 'Authenticating...' : 'Sign In'}
             </Button>
           </form>
+          
+          {/* 2FA Notice */}
+          {TWO_FACTOR_CONFIG.enabled && (
+            <div className="mt-4 p-3 bg-teal-900/20 border border-teal-700/50 rounded-lg flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-teal-400" />
+              <span className="text-xs text-teal-400">Two-factor authentication is enabled</span>
+            </div>
+          )}
+          
           <div className="mt-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Info className="w-4 h-4 text-teal-400" />
